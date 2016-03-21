@@ -103,7 +103,17 @@ template '/opt/jira/bin/setenv.sh' do
   mode '0644'
 end
 
-execute 'start_jira' do
-  user node['jira-server']['user']}
-  command "#{node['jira-server']['base_install_sym']}/bin/start-jira.sh"
+template '/etc/init.d/jira' do
+  source 'jira.erb'
+  mode '0755'
+  owner 'root'
+  group 'root'
+end
+
+execute 'add_jira_service' do
+  command "chkconfig --add jira"
+end
+
+service "jira" do
+  action [:enable, :start]
 end

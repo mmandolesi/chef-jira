@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# JIRA        Start/Stop/Restart script for the Atlassian JIRA service
+#
+# chkconfig: 2345 90 60
+# description: Atlassian JIRA Server
+#
+# RUN_AS: The user to run fisheye as. Its recommended that you create a separate user account for security reasons
+RUN_AS=<%= node['jira-server']['user'] %>
+
+JIRA_INSTALLATION="<%= node['jira-server']['base_install_sym'] %>"
+JIRA_HOME="<%= node['jira-server']['jira_home'] %>"
+
+jiractl() {
+        if [ "x$USER" != "x$RUN_AS" ]; then
+                su - "$RUN_AS" -c "export JIRA_HOME=$JIRA_HOME;$JIRA_INSTALLATION/bin/$1"
+        else
+                "export JIRA_HOME=$JIRA_HOME;$JIRA_INSTALLATION/bin/$1"
+        fi
+}
+
+case "$1" in
+        start)
+                jiractl start-jira.sh
+                ;;
+        stop)
+                jiractl stop-jira.sh
+                ;;
+        restart)
+                jiractl stop-jira.sh
+                sleep 10
+                jiractl start-jira.sh
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+esac
+
+exit 0

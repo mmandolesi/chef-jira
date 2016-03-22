@@ -31,8 +31,18 @@ case "$1" in
                 sleep 10
                 jiractl start-jira.sh
                 ;;
+        status)
+                if [ -e /opt/jira/work/catalina.pid ]
+                then
+                  echo "JIRA service is running"
+                  exit 0
+                else
+                  echo "JIRA service is not running"
+                  exit 1
+                fi
+                ;;
         *)
-                echo "Usage: $0 {start|stop|restart}"
+                echo "Usage: $0 {start|stop|restart|status}"
 esac
 
 exit 0

@@ -65,7 +65,21 @@ directory node['jira-server']['jira_home'] do
   action :create
 end
 
-package ['httpd', 'mysql', 'mysql-server' ]
+package ['httpd', 'mod_ssl', 'mysql', 'mysql-server' ]
+
+template '/etc/httpd/httpd.conf' do
+  source 'httpd.conf.erb'
+  mode '0755'
+  owner 'root'
+  group 'root'
+end
+
+template '/etc/httpd/conf.d/ssl.conf' do
+  source 'ssl.conf.erb'
+  mode '0755'
+  owner 'root'
+  group 'root'
+end
 
 service "httpd" do
   action [:enable, :start]
@@ -101,6 +115,13 @@ end
 template '/opt/jira/bin/setenv.sh' do
   source 'setenv.sh.erb'
   mode '0644'
+end
+
+template '/opt/jira/conf/server.xml' do
+  source 'server.xml.erb'
+  mode '0755'
+  owner node['jira-server']['user']
+  group node['jira-server']['user']
 end
 
 template '/etc/init.d/jira' do

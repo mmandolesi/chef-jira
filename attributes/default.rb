@@ -14,3 +14,5 @@ default['mysql']['database_name'] = 'jiradb'
 
 
 default['java']['download_url'] = 'https://www.dropbox.com/s/v6x2o7n5914otsb/jre-8u73-linux-x64.rpm?dl=1'
+
+default['httpd']['jira_URL'] = 'staging-jira'

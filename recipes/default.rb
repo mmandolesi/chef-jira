@@ -28,6 +28,7 @@ end
 
 execute 'extract_jira_tar' do
   command "tar xvf #{package_local_path} -C /opt/"
+  not_if "ls /opt/jira/logs"
 end
 
 link node['jira-server']['base_install_sym'] do
@@ -67,7 +68,7 @@ end
 
 package ['httpd', 'mod_ssl', 'mysql', 'mysql-server' ]
 
-template '/etc/httpd/httpd.conf' do
+template '/etc/httpd/conf/httpd.conf' do
   source 'httpd.conf.erb'
   mode '0755'
   owner 'root'
@@ -101,10 +102,12 @@ end
 execute 'mysql_create_user' do
   command "/usr/bin/mysql -u root -e \"CREATE USER #{node['mysql']['user']}@localhost IDENTIFIED BY '#{node['mysql']['password']}'\""
   not_if  "/usr/bin/mysql -u root -e \"SELECT USER FROM mysql.user\" | grep #{node['mysql']['user']}"
+  notifies :run, 'execute[mysql_privileges]', :immediately
 end
 
 execute 'mysql_privileges' do
   command "/usr/bin/mysql -u root -e \"GRANT ALL PRIVILEGES ON *.* TO #{node['mysql']['user']}@localhost\""
+  action :nothing
 end
 
 template '/jira/dbconfig.xml' do
@@ -129,10 +132,12 @@ template '/etc/init.d/jira' do
   mode '0755'
   owner 'root'
   group 'root'
+  notifies :run, 'execute[add_jira_service]', :immediately
 end
 
 execute 'add_jira_service' do
   command "chkconfig --add jira"
+  action :nothing
 end
 
 service "jira" do
